@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: effective_mobile_backend
+    networks:
+      - effective_net
+    # порт доступен только внутри сети effective_net
+    expose:
+      - "8080"
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: effective_mobile_nginx
+    ports:
+      - "80:80"
+    volumes:
+      # Прокидываем конфигурационный файл в режиме read-only
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - effective_net
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+# Отдельная docker-сеть для безопасного взаимодействия контейнеров
+networks:
+  effective_net:
+    driver: bridge
+    name: effective_mobile_network
