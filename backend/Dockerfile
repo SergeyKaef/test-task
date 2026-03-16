@@ -11,7 +11,7 @@ USER appuser
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget -qO- http://localhost:8080/ || exit 1
+HEALTHCHECK --interval=10s --timeout=3s --start-period=3s --retries=3 \
+  CMD pgrep -f "python app.py" || exit 1
 
 CMD ["python", "app.py"]
